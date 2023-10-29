@@ -140,22 +140,27 @@ class Game {
         var playerYprev = this.playerY;
         switch (move) {
             case "up":
-                this.playerY -= 1;
+                this.playerY = Math.max(this.playerY - 1, 0);
                 break;
             case "down":
-                this.playerY += 1;
+                this.playerY = Math.min(this.playerY + 1, 23);
                 break;
             case "left":
-                this.playerX -= 1;
+                this.playerX = Math.max(this.playerX - 1, 0);
                 break;
             case "right":
-                this.playerX += 1;
+                this.playerX = Math.min(this.playerX + 1, 39);
                 break;
             default:
                 break;
         }
-        this.map[this.playerX][this.playerY] = this.player;
-        this.map[playerXprev][playerYprev] = new Tile();
+        if (this.map[this.playerX][this.playerY].constructor.name !== "Wall") {
+            this.map[playerXprev][playerYprev] = new Tile();
+            this.map[this.playerX][this.playerY] = this.player;
+        } else {
+            this.playerX = playerXprev;
+            this.playerY = playerYprev;
+        }
     }
 
     renderMap() {
