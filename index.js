@@ -1,35 +1,78 @@
 class Tile {
-    texture = "tile";
+    texture = "";
 }
 
 class Wall extends Tile {
     texture = "tileW";
 }
 
+class Enemy extends Tile {
+    texture = "tileE";
+}
+
 class Game {
-    generateMap() {
-        var arr = Array.from(Array(40), function () {
-            return new Array(24);
+    map = [];
+    mapW = 40;
+    mapH = 24;
+
+    getRandom(min, max) {
+        return min + Math.floor(Math.random() * (max - min + 1));
+    }
+
+    randomArray(length, min, max) {
+        return Array.apply(null, Array(length)).map(function () {
+            return new Game().getRandom(min, max);
         });
-        var verCorridors = {
-            amount: 3 + Math.floor(Math.random() * 2),
-            pos: 1 + Math.floor(Math.random() * 37),
-        };
-        var horCorridors = {
-            amount: 3 + Math.floor(Math.random() * 2),
-            pos: 1 + Math.floor(Math.random() * 22),
-        };
-        for (let i = 0; i < 40; i++) {
-            for (let j = 0; j < 24; j++) {
-                arr[i][j] = new Wall();
+    }
+
+    generateMap() {
+        this.map = Array.from(
+            Array(this.mapW),
+            function () {
+                return new Array(this.mapH);
+            }.bind(this)
+        );
+    }
+
+    generateCorridors() {
+        var horCorridors = this.randomArray(this.getRandom(3, 5), 2, 24);
+        var verCorridors = this.randomArray(this.getRandom(3, 5), 2, 38);
+
+        for (let x = 0; x < this.mapW; x++) {
+            for (let y = 0; y < this.mapH; y++) {
+                if (horCorridors.includes(y) || verCorridors.includes(x)) {
+                    this.map[x][y] = new Tile();
+                } else {
+                    this.map[x][y] = new Wall();
+                }
             }
         }
+    }
 
+    generateRooms() {
+        var numRooms = this.getRandom(3, 5);
+
+        for (let i = 0; i < numRooms; i++) {
+            var roomH = this.getRandom(3, 8);
+            var roomW = this.getRandom(3, 8);
+            var roomX = this.getRandom(1, this.mapW - roomW);
+            var roomY = this.getRandom(1, this.mapH - roomH);
+            for (let x = roomX; x < roomX + roomW; x++) {
+                for (let y = roomY; y < roomY + roomH; y++) {
+                    this.map[x][y] = new Tile();
+                }
+            }
+        }
+    }
+
+    renderMap() {
         var field = document.querySelector(".field");
-        for (let i = 0; i < arr.length; i++) {
-            for (let j = 0; j < arr[0].length; j++) {
+        for (let x = 0; x < this.mapH; x++) {
+            for (let y = 0; y < this.mapW; y++) {
                 var wallElem = document.createElement("div");
-                wallElem.setAttribute("class", "tile " + arr[i][j].texture);
+                wallElem.setAttribute("class", "tile " + this.map[y][x].texture);
+                wallElem.innerHTML = x + 1 + " " + (y + 1);
+                wallElem.style.fontSize = "10px";
                 field.appendChild(wallElem);
             }
         }
@@ -37,6 +80,9 @@ class Game {
 
     init() {
         this.generateMap();
+        this.generateCorridors();
+        this.generateRooms();
+        this.renderMap();
         // this.generateUnits();
         // this.generateItems();
     }
