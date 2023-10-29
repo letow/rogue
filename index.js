@@ -29,6 +29,10 @@ class Game {
     swords = 2;
     potions = 10;
     enemies = 10;
+    player = new Player();
+    playerX;
+    playerY;
+    fps = 15;
 
     getRandom(min, max) {
         return min + Math.floor(Math.random() * (max - min + 1));
@@ -123,14 +127,40 @@ class Game {
             var x = this.getRandom(1, 39);
             var y = this.getRandom(1, 23);
             if (this.isTileEmpty(x, y)) {
-                this.map[x][y] = new Player();
+                this.map[x][y] = this.player;
+                this.playerX = x;
+                this.playerY = y;
                 break;
             }
         }
     }
 
+    move(move) {
+        var playerXprev = this.playerX;
+        var playerYprev = this.playerY;
+        switch (move) {
+            case "up":
+                this.playerY -= 1;
+                break;
+            case "down":
+                this.playerY += 1;
+                break;
+            case "left":
+                this.playerX -= 1;
+                break;
+            case "right":
+                this.playerX += 1;
+                break;
+            default:
+                break;
+        }
+        this.map[this.playerX][this.playerY] = this.player;
+        this.map[playerXprev][playerYprev] = new Tile();
+    }
+
     renderMap() {
         var field = document.querySelector(".field");
+        field.innerHTML = "";
 
         for (let x = 0; x < this.mapH; x++) {
             for (let y = 0; y < this.mapW; y++) {
@@ -141,6 +171,37 @@ class Game {
         }
     }
 
+    addListeners() {
+        document.addEventListener(
+            "keydown",
+            function (e) {
+                console.log(e.code);
+                switch (e.code) {
+                    case "KeyW":
+                        this.move("up");
+                        break;
+                    case "KeyS":
+                        this.move("down");
+                        break;
+                    case "KeyA":
+                        this.move("left");
+                        break;
+                    case "KeyD":
+                        this.move("right");
+                        break;
+                    default:
+                        break;
+                }
+            }.bind(this)
+        );
+        var a = setInterval(
+            function () {
+                this.renderMap();
+            }.bind(this),
+            1000 / this.fps
+        );
+    }
+
     init() {
         this.generateMap();
         this.generateCorridors();
@@ -148,5 +209,6 @@ class Game {
         this.generateItems();
         this.generateUnits();
         this.renderMap();
+        this.addListeners();
     }
 }
