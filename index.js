@@ -10,6 +10,10 @@ class Enemy extends Tile {
     texture = "tileE";
 }
 
+class Player extends Tile {
+    texture = "tileP";
+}
+
 class Sword extends Tile {
     texture = "tileSW";
 }
@@ -24,6 +28,7 @@ class Game {
     mapH = 24;
     swords = 2;
     potions = 10;
+    enemies = 10;
 
     getRandom(min, max) {
         return min + Math.floor(Math.random() * (max - min + 1));
@@ -102,6 +107,28 @@ class Game {
         }
     }
 
+    generateUnits() {
+        var generatedEnemies = 0;
+
+        while (generatedEnemies < this.enemies) {
+            var x = this.getRandom(1, 39);
+            var y = this.getRandom(1, 23);
+            if (this.isTileEmpty(x, y)) {
+                this.map[x][y] = new Enemy();
+                generatedEnemies++;
+            }
+        }
+
+        while (true) {
+            var x = this.getRandom(1, 39);
+            var y = this.getRandom(1, 23);
+            if (this.isTileEmpty(x, y)) {
+                this.map[x][y] = new Player();
+                break;
+            }
+        }
+    }
+
     renderMap() {
         var field = document.querySelector(".field");
 
@@ -119,7 +146,7 @@ class Game {
         this.generateCorridors();
         this.generateRooms();
         this.generateItems();
+        this.generateUnits();
         this.renderMap();
-        // this.generateUnits();
     }
 }
