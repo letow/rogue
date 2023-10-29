@@ -10,10 +10,20 @@ class Enemy extends Tile {
     texture = "tileE";
 }
 
+class Sword extends Tile {
+    texture = "tileSW";
+}
+
+class Potion extends Tile {
+    texture = "tileHP";
+}
+
 class Game {
     map = [];
     mapW = 40;
     mapH = 24;
+    swords = 2;
+    potions = 10;
 
     getRandom(min, max) {
         return min + Math.floor(Math.random() * (max - min + 1));
@@ -23,6 +33,10 @@ class Game {
         return Array.apply(null, Array(length)).map(function () {
             return new Game().getRandom(min, max);
         });
+    }
+
+    isTileEmpty(x, y) {
+        return this.map[x][y].texture === "";
     }
 
     generateMap() {
@@ -65,14 +79,36 @@ class Game {
         }
     }
 
+    generateItems() {
+        var generatedSwords = 0;
+        var generatedPotions = 0;
+
+        while (generatedSwords < this.swords) {
+            var x = this.getRandom(1, 39);
+            var y = this.getRandom(1, 23);
+            if (this.isTileEmpty(x, y)) {
+                this.map[x][y] = new Sword();
+                generatedSwords++;
+            }
+        }
+
+        while (generatedPotions < this.potions) {
+            var x = this.getRandom(1, 39);
+            var y = this.getRandom(1, 23);
+            if (this.isTileEmpty(x, y)) {
+                this.map[x][y] = new Potion();
+                generatedPotions++;
+            }
+        }
+    }
+
     renderMap() {
         var field = document.querySelector(".field");
+
         for (let x = 0; x < this.mapH; x++) {
             for (let y = 0; y < this.mapW; y++) {
                 var wallElem = document.createElement("div");
                 wallElem.setAttribute("class", "tile " + this.map[y][x].texture);
-                wallElem.innerHTML = x + 1 + " " + (y + 1);
-                wallElem.style.fontSize = "10px";
                 field.appendChild(wallElem);
             }
         }
@@ -82,8 +118,8 @@ class Game {
         this.generateMap();
         this.generateCorridors();
         this.generateRooms();
+        this.generateItems();
         this.renderMap();
         // this.generateUnits();
-        // this.generateItems();
     }
 }
