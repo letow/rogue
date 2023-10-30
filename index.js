@@ -8,6 +8,10 @@ class Wall extends Tile {
 
 class Enemy extends Tile {
     texture = "tileE";
+    id;
+    posX;
+    posY;
+    HP = 50;
 }
 
 class Player extends Tile {
@@ -28,20 +32,24 @@ class Game {
     mapH = 24;
     swords = 2;
     potions = 10;
-    enemies = 10;
+    enemies = Array(10);
     player = new Player();
     playerX;
     playerY;
     fps = 15;
+    HP = 100;
+    power = 10;
 
     getRandom(min, max) {
         return min + Math.floor(Math.random() * (max - min + 1));
     }
 
     randomArray(length, min, max) {
-        return Array.apply(null, Array(length)).map(function () {
-            return new Game().getRandom(min, max);
-        });
+        return Array.apply(null, Array(length)).map(
+            function () {
+                return this.getRandom(min, max);
+            }.bind(this)
+        );
     }
 
     isTileEmpty(x, y) {
@@ -114,11 +122,16 @@ class Game {
     generateUnits() {
         var generatedEnemies = 0;
 
-        while (generatedEnemies < this.enemies) {
+        while (generatedEnemies < this.enemies.length) {
             var x = this.getRandom(1, 39);
             var y = this.getRandom(1, 23);
             if (this.isTileEmpty(x, y)) {
-                this.map[x][y] = new Enemy();
+                var enemy = new Enemy();
+                enemy.id = generatedEnemies;
+                enemy.posX = x;
+                enemy.posY = y;
+                this.map[x][y] = enemy;
+                this.enemies[generatedEnemies] = enemy;
                 generatedEnemies++;
             }
         }
@@ -154,13 +167,43 @@ class Game {
             default:
                 break;
         }
-        if (this.map[this.playerX][this.playerY].constructor.name !== "Wall") {
-            this.map[playerXprev][playerYprev] = new Tile();
-            this.map[this.playerX][this.playerY] = this.player;
-        } else {
-            this.playerX = playerXprev;
-            this.playerY = playerYprev;
+        var tileTo = this.map[this.playerX][this.playerY].constructor.name;
+        switch (tileTo) {
+            case "Wall":
+                this.playerX = playerXprev;
+                this.playerY = playerYprev;
+                break;
+            case "Enemy":
+                this.playerX = playerXprev;
+                this.playerY = playerYprev;
+                break;
+            default:
+                this.map[playerXprev][playerYprev] = new Tile();
+                this.map[this.playerX][this.playerY] = this.player;
+                break;
         }
+    }
+
+    hit(x, y) {
+        if (this.map[x][y].HP) {
+            this.map[x][y].HP -= this.power;
+            if (this.map[x][y].HP <= 0) {
+                var id = this.map[x][y].id;
+                this.enemies[id] = null;
+                this.map[x][y] = new Tile();
+            }
+        }
+    }
+
+    attack() {
+        this.hit(this.playerX + 1, this.playerY);
+        this.hit(this.playerX - 1, this.playerY);
+        this.hit(this.playerX, this.playerY + 1);
+        this.hit(this.playerX, this.playerY - 1);
+        this.hit(this.playerX + 1, this.playerY + 1);
+        this.hit(this.playerX - 1, this.playerY - 1);
+        this.hit(this.playerX - 1, this.playerY + 1);
+        this.hit(this.playerX + 1, this.playerY - 1);
     }
 
     renderMap() {
@@ -169,9 +212,15 @@ class Game {
 
         for (let x = 0; x < this.mapH; x++) {
             for (let y = 0; y < this.mapW; y++) {
-                var wallElem = document.createElement("div");
-                wallElem.setAttribute("class", "tile " + this.map[y][x].texture);
-                field.appendChild(wallElem);
+                var tile = document.createElement("div");
+                tile.setAttribute("class", "tile " + this.map[y][x].texture);
+                if (this.map[y][x].HP) {
+                    var healthbar = document.createElement("div");
+                    healthbar.setAttribute("class", "health");
+                    healthbar.style.width = ((this.map[y][x].HP * 25) / 50).toString() + "px";
+                    tile.appendChild(healthbar);
+                }
+                field.appendChild(tile);
             }
         }
     }
@@ -194,17 +243,21 @@ class Game {
                     case "KeyD":
                         this.move("right");
                         break;
+                    case "Space":
+                        this.attack();
+                        break;
                     default:
                         break;
                 }
+                this.renderMap();
             }.bind(this)
         );
-        var a = setInterval(
-            function () {
-                this.renderMap();
-            }.bind(this),
-            1000 / this.fps
-        );
+        // var updateFrames = setInterval(
+        //     function () {
+        //         this.renderMap();
+        //     }.bind(this),
+        //     1000 / this.fps
+        // );
     }
 
     init() {
