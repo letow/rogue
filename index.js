@@ -74,20 +74,18 @@ class Game {
     }
 
     generateMap() {
-        this.map = Array.from(
-            Array(this.mapW),
-            function () {
-                return new Array(this.mapH);
-            }.bind(this)
-        );
+        this.map = Array(this.mapW);
+        for (var i = 0; i < this.map.length; i++) {
+            this.map[i] = new Array(this.mapH);
+        }
     }
 
     generateCorridors() {
         var horCorridors = this.randomArray(this.getRandom(3, 5), 2, 24);
         var verCorridors = this.randomArray(this.getRandom(3, 5), 2, 38);
 
-        for (let x = 0; x < this.mapW; x++) {
-            for (let y = 0; y < this.mapH; y++) {
+        for (var x = 0; x < this.mapW; x++) {
+            for (var y = 0; y < this.mapH; y++) {
                 if (horCorridors.includes(y) || verCorridors.includes(x)) {
                     this.map[x][y] = new Tile();
                 } else {
@@ -108,15 +106,15 @@ class Game {
             var roomX = this.getRandom(1, this.mapW - roomW);
             var roomY = this.getRandom(1, this.mapH - roomH);
 
-            for (let x = roomX; x < roomX + roomW; x++) {
-                for (let y = roomY; y < roomY + roomH; y++) {
+            for (var x = roomX; x < roomX + roomW; x++) {
+                for (var y = roomY; y < roomY + roomH; y++) {
                     if (this.map[x][y].constructor.name === "Tile") counter++;
                 }
             }
 
             if (counter > 0) {
-                for (let x = roomX; x < roomX + roomW; x++) {
-                    for (let y = roomY; y < roomY + roomH; y++) {
+                for (var x = roomX; x < roomX + roomW; x++) {
+                    for (var y = roomY; y < roomY + roomH; y++) {
                         this.map[x][y] = new Tile();
                     }
                 }
@@ -178,7 +176,7 @@ class Game {
     }
 
     moveUnit() {
-        for (let i = 0; i < this.enemies.length; i++) {
+        for (var i = 0; i < this.enemies.length; i++) {
             if (this.enemies[i]) {
                 var enemy = this.enemies[i];
                 var axes = ["x", "y"];
@@ -335,8 +333,8 @@ class Game {
             clearInterval(this.updateDamage);
             clearInterval(this.updateFrames);
         } else {
-            for (let x = 0; x < this.mapH; x++) {
-                for (let y = 0; y < this.mapW; y++) {
+            for (var x = 0; x < this.mapH; x++) {
+                for (var y = 0; y < this.mapW; y++) {
                     var tile = document.createElement("div");
                     tile.setAttribute("class", "tile " + this.map[y][x].texture);
                     if (this.map[y][x].HP) {
