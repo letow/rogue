@@ -182,7 +182,9 @@ class Game {
             default:
                 break;
         }
+
         var tileTo = this.map[this.playerX][this.playerY].constructor.name;
+
         switch (tileTo) {
             case "Wall":
                 this.playerX = playerXprev;
@@ -194,9 +196,13 @@ class Game {
                 break;
             case "Potion":
                 this.player.HP = Math.min(this.player.HP + 50, 100);
+                this.map[playerXprev][playerYprev] = new Tile();
+                this.map[this.playerX][this.playerY] = this.player;
                 break;
             case "Sword":
                 this.player.power = Math.min(this.player.power + 30, 50);
+                this.map[playerXprev][playerYprev] = new Tile();
+                this.map[this.playerX][this.playerY] = this.player;
                 break;
             default:
                 this.map[playerXprev][playerYprev] = new Tile();
