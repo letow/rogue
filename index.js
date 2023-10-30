@@ -227,22 +227,29 @@ class Game {
         var field = document.querySelector(".field");
         field.innerHTML = "";
 
-        for (let x = 0; x < this.mapH; x++) {
-            for (let y = 0; y < this.mapW; y++) {
-                var tile = document.createElement("div");
-                tile.setAttribute("class", "tile " + this.map[y][x].texture);
-                if (this.map[y][x].HP) {
-                    var healthbar = document.createElement("div");
-                    healthbar.setAttribute("class", "health");
-                    healthbar.style.width =
-                        (this.map[y][x].HP * 25) /
-                            (this.map[y][x].constructor.name === "Enemy"
-                                ? this.enemiesHP
-                                : this.HP) +
-                        "px";
-                    tile.appendChild(healthbar);
+        if (this.player.HP <= 0) {
+            var d = document.createElement("div");
+            d.innerText = "You died";
+            d.setAttribute("class", "deathscreen");
+            field.appendChild(d);
+        } else {
+            for (let x = 0; x < this.mapH; x++) {
+                for (let y = 0; y < this.mapW; y++) {
+                    var tile = document.createElement("div");
+                    tile.setAttribute("class", "tile " + this.map[y][x].texture);
+                    if (this.map[y][x].HP) {
+                        var healthbar = document.createElement("div");
+                        healthbar.setAttribute("class", "health");
+                        healthbar.style.width =
+                            (this.map[y][x].HP * 25) /
+                                (this.map[y][x].constructor.name === "Enemy"
+                                    ? this.enemiesHP
+                                    : this.HP) +
+                            "px";
+                        tile.appendChild(healthbar);
+                    }
+                    field.appendChild(tile);
                 }
-                field.appendChild(tile);
             }
         }
     }
