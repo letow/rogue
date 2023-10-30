@@ -85,16 +85,28 @@ class Game {
 
     generateRooms() {
         var numRooms = this.getRandom(3, 5);
+        var generatedRooms = 0;
 
-        for (let i = 0; i < numRooms; i++) {
+        while (generatedRooms < numRooms) {
+            var counter = 0;
             var roomH = this.getRandom(3, 8);
             var roomW = this.getRandom(3, 8);
             var roomX = this.getRandom(1, this.mapW - roomW);
             var roomY = this.getRandom(1, this.mapH - roomH);
+
             for (let x = roomX; x < roomX + roomW; x++) {
                 for (let y = roomY; y < roomY + roomH; y++) {
-                    this.map[x][y] = new Tile();
+                    if (this.map[x][y].constructor.name === "Tile") counter++;
                 }
+            }
+
+            if (counter > 0) {
+                for (let x = roomX; x < roomX + roomW; x++) {
+                    for (let y = roomY; y < roomY + roomH; y++) {
+                        this.map[x][y] = new Tile();
+                    }
+                }
+                generatedRooms++;
             }
         }
     }
