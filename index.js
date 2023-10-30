@@ -329,7 +329,7 @@ class Game {
 
         if (this.player.HP <= 0) {
             var d = document.createElement("div");
-            d.innerText = "You died";
+            d.innerHTML = '<p>You died</p><button onClick="location.reload()">Restart</button>';
             d.setAttribute("class", "deathscreen");
             field.appendChild(d);
             clearInterval(this.updateDamage);
