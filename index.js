@@ -16,6 +16,7 @@ class Enemy extends Tile {
 
 class Player extends Tile {
     texture = "tileP";
+    HP = 100;
 }
 
 class Sword extends Tile {
@@ -38,6 +39,7 @@ class Game {
     playerY;
     fps = 15;
     HP = 100;
+    enemiesHP = 50;
     power = 10;
 
     getRandom(min, max) {
@@ -206,6 +208,21 @@ class Game {
         this.hit(this.playerX + 1, this.playerY - 1);
     }
 
+    gettingHit() {
+        this.damage(this.playerX + 1, this.playerY);
+        this.damage(this.playerX - 1, this.playerY);
+        this.damage(this.playerX, this.playerY + 1);
+        this.damage(this.playerX, this.playerY - 1);
+        this.damage(this.playerX + 1, this.playerY + 1);
+        this.damage(this.playerX - 1, this.playerY - 1);
+        this.damage(this.playerX - 1, this.playerY + 1);
+        this.damage(this.playerX + 1, this.playerY - 1);
+    }
+
+    damage(x, y) {
+        if (this.map[x][y].constructor.name === "Enemy") this.player.HP -= 10;
+    }
+
     renderMap() {
         var field = document.querySelector(".field");
         field.innerHTML = "";
@@ -217,7 +234,12 @@ class Game {
                 if (this.map[y][x].HP) {
                     var healthbar = document.createElement("div");
                     healthbar.setAttribute("class", "health");
-                    healthbar.style.width = ((this.map[y][x].HP * 25) / 50).toString() + "px";
+                    healthbar.style.width =
+                        (this.map[y][x].HP * 25) /
+                            (this.map[y][x].constructor.name === "Enemy"
+                                ? this.enemiesHP
+                                : this.HP) +
+                        "px";
                     tile.appendChild(healthbar);
                 }
                 field.appendChild(tile);
@@ -256,8 +278,14 @@ class Game {
         //     function () {
         //         this.renderMap();
         //     }.bind(this),
-        //     1000 / this.fps
+        //     1000 // this.fps
         // );
+        var updateDamage = setInterval(
+            function () {
+                this.gettingHit();
+            }.bind(this),
+            1000
+        );
     }
 
     init() {
