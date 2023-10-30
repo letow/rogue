@@ -194,8 +194,10 @@ class Game {
                 break;
             case "Potion":
                 this.player.HP = Math.min(this.player.HP + 50, 100);
+                break;
             case "Sword":
                 this.player.power = Math.min(this.player.power + 30, 50);
+                break;
             default:
                 this.map[playerXprev][playerYprev] = new Tile();
                 this.map[this.playerX][this.playerY] = this.player;
