@@ -43,6 +43,20 @@ class Game {
     enemiesHP = 50;
     power = 10;
 
+    updateFrames = setInterval(
+        function () {
+            this.renderMap();
+            this.moveUnit();
+        }.bind(this),
+        500 // this.fps
+    );
+    updateDamage = setInterval(
+        function () {
+            this.gettingHit();
+        }.bind(this),
+        1000
+    );
+
     getRandom(min, max) {
         return min + Math.floor(Math.random() * (max - min + 1));
     }
@@ -163,6 +177,37 @@ class Game {
         }
     }
 
+    moveUnit() {
+        for (let i = 0; i < this.enemies.length; i++) {
+            if (this.enemies[i]) {
+                var enemy = this.enemies[i];
+                var axes = ["x", "y"];
+                var directions = ["+", "-"];
+                var axis = axes[this.getRandom(0, 1)];
+                var direction = directions[this.getRandom(0, 1)];
+                var prevX = enemy.posX;
+                var prevY = enemy.posY;
+                if (axis === "x") {
+                    if (direction === "+") {
+                        enemy.posX = Math.min(enemy.posX + 1, 39);
+                    } else enemy.posX = Math.max(enemy.posX - 1, 0);
+                } else {
+                    if (direction === "+") {
+                        enemy.posY = Math.min(enemy.posY + 1, 23);
+                    } else enemy.posY = Math.max(enemy.posY - 1, 0);
+                }
+                var tileTo = this.map[enemy.posX][enemy.posY].constructor.name;
+                if (tileTo !== "Tile") {
+                    enemy.posX = prevX;
+                    enemy.posY = prevY;
+                    continue;
+                }
+                this.map[enemy.posX][enemy.posY] = enemy;
+                this.map[prevX][prevY] = new Tile();
+            }
+        }
+    }
+
     move(move) {
         var playerXprev = this.playerX;
         var playerYprev = this.playerY;
@@ -245,37 +290,8 @@ class Game {
     }
 
     damage(x, y) {
-        if (this.map[x][y].constructor.name === "Enemy") this.player.HP -= this.power;
-    }
-
-    renderMap() {
-        var field = document.querySelector(".field");
-        field.innerHTML = "";
-
-        if (this.player.HP <= 0) {
-            var d = document.createElement("div");
-            d.innerText = "You died";
-            d.setAttribute("class", "deathscreen");
-            field.appendChild(d);
-        } else {
-            for (let x = 0; x < this.mapH; x++) {
-                for (let y = 0; y < this.mapW; y++) {
-                    var tile = document.createElement("div");
-                    tile.setAttribute("class", "tile " + this.map[y][x].texture);
-                    if (this.map[y][x].HP) {
-                        var healthbar = document.createElement("div");
-                        healthbar.setAttribute("class", "health");
-                        healthbar.style.width =
-                            (this.map[y][x].HP * 25) /
-                                (this.map[y][x].constructor.name === "Enemy"
-                                    ? this.enemiesHP
-                                    : this.HP) +
-                            "px";
-                        tile.appendChild(healthbar);
-                    }
-                    field.appendChild(tile);
-                }
-            }
+        if (this.map[x][y]) {
+            if (this.map[x][y].constructor.name === "Enemy") this.player.HP -= this.power;
         }
     }
 
@@ -283,7 +299,6 @@ class Game {
         document.addEventListener(
             "keydown",
             function (e) {
-                console.log(e.code);
                 switch (e.code) {
                     case "KeyW":
                         this.move("up");
@@ -306,18 +321,39 @@ class Game {
                 this.renderMap();
             }.bind(this)
         );
-        // var updateFrames = setInterval(
-        //     function () {
-        //         this.renderMap();
-        //     }.bind(this),
-        //     1000 // this.fps
-        // );
-        var updateDamage = setInterval(
-            function () {
-                this.gettingHit();
-            }.bind(this),
-            1000
-        );
+    }
+
+    renderMap() {
+        var field = document.querySelector(".field");
+        field.innerHTML = "";
+
+        if (this.player.HP <= 0) {
+            var d = document.createElement("div");
+            d.innerText = "You died";
+            d.setAttribute("class", "deathscreen");
+            field.appendChild(d);
+            clearInterval(this.updateDamage);
+            clearInterval(this.updateFrames);
+        } else {
+            for (let x = 0; x < this.mapH; x++) {
+                for (let y = 0; y < this.mapW; y++) {
+                    var tile = document.createElement("div");
+                    tile.setAttribute("class", "tile " + this.map[y][x].texture);
+                    if (this.map[y][x].HP) {
+                        var healthbar = document.createElement("div");
+                        healthbar.setAttribute("class", "health");
+                        healthbar.style.width =
+                            (this.map[y][x].HP * 25) /
+                                (this.map[y][x].constructor.name === "Enemy"
+                                    ? this.enemiesHP
+                                    : this.HP) +
+                            "px";
+                        tile.appendChild(healthbar);
+                    }
+                    field.appendChild(tile);
+                }
+            }
+        }
     }
 
     init() {
