@@ -17,6 +17,7 @@ class Enemy extends Tile {
 class Player extends Tile {
     texture = "tileP";
     HP = 100;
+    power = 10;
 }
 
 class Sword extends Tile {
@@ -179,6 +180,10 @@ class Game {
                 this.playerX = playerXprev;
                 this.playerY = playerYprev;
                 break;
+            case "Potion":
+                this.player.HP = Math.min(this.player.HP + 50, 100);
+            case "Sword":
+                this.player.power = Math.min(this.player.power + 30, 50);
             default:
                 this.map[playerXprev][playerYprev] = new Tile();
                 this.map[this.playerX][this.playerY] = this.player;
@@ -188,7 +193,7 @@ class Game {
 
     hit(x, y) {
         if (this.map[x][y].HP) {
-            this.map[x][y].HP -= this.power;
+            this.map[x][y].HP -= this.player.power;
             if (this.map[x][y].HP <= 0) {
                 var id = this.map[x][y].id;
                 this.enemies[id] = null;
@@ -220,7 +225,7 @@ class Game {
     }
 
     damage(x, y) {
-        if (this.map[x][y].constructor.name === "Enemy") this.player.HP -= 10;
+        if (this.map[x][y].constructor.name === "Enemy") this.player.HP -= this.power;
     }
 
     renderMap() {
